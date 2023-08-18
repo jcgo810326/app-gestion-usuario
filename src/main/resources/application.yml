@@ -1,0 +1,104 @@
+server:
+  port: 8080
+  servlet:
+    # context-path: /v1/siaf-services/rendicion
+    context-path: /auth/realms
+
+spring:
+  profiles:
+    active: dev
+  application:
+    # name: sisot-cuentaprincipal-service
+    name: app-realms-auth-service
+  datasource:
+    # driver-class-name: oracle.jdbc.OracleDriver
+    driver-class-name: org.postgresql.Driver
+    # url: jdbc:oracle:thin:@//${ORACLE_CONN:10.5.115.15:1522}/${ORACLE_DB:desa}
+    url: jdbc:postgresql://stampy.db.elephantsql.com/jnzuxscx
+    #username: ${ORACLE_USERNAME:ejecucion_app}
+    #password: ${ORACLE_PASSWORD:ejecucion_app}
+    username: jnzuxscx
+    password: lzZcISaHN3PFhceq_hKoUqRp8-0gCqEE
+    hikari:
+      auto-commit: false
+      connectionTimeout: 20000 
+      idleTimeout: 300000  
+      maxLifetime: 900000
+      minimumIdle: 5
+  jpa:
+    # database-platform: org.hibernate.dialect.Oracle10gDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        cache:
+          '[use_query_cache]': false
+        temp:
+          use-jdbc-metadata-defaults: false
+        '[format_sql]': true
+        '[use_sql_comments]': true
+        jdbc:
+          '[batch_versioned_data]': true
+          '[batch_size]': 100
+        '[order_updates]': true
+        connection:
+          '[provider_disables_autocommit]': true
+        '[proc.param_null_passing]': true
+  #security:
+  #  oauth2:
+  #    resourceserver:
+  #      jwt:
+  #        issuer-uri: https://${MEF_REALM_URI_ISSUER:authorizedesa.mineco.gob.pe}/auth/realms/mef
+     
+---
+spring:
+  config.activate.on-profile: dev 
+
+logging:
+  level:
+    org.springframework: DEBUG
+    pe.gob.mef: DEBUG
+
+test:
+  passkeyc: 12345678
+
+---
+ 
+jwt:
+  secret: e425497374df586a6075c5b7299fd973d3af68f8974704748aeeda93c24c12f3
+
+---
+spring:
+  config.activate.on-profile: prod
+logging:
+  level:
+    root: ERROR
+    pe.gob.mef: INFO
+          
+---                  
+spring:
+  config.activate.on-profile: test
+  datasource:
+    #driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:oracle:thin:@//${ORACLE_CONN:10.5.115.151:1521}/${ORACLE_DB:testnew}
+    username: ${ORACLE_USERNAME:maestros_dot_app}
+    password: ${ORACLE_PASSWORD:maestros_dot_app}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    open-in-view: false
+  #security:
+  #  oauth2:
+  #    resourceserver:
+  #      jwt:
+  #        issuer-uri: https://${MEF_REALM_URI_ISSUER:authorizetest.mineco.gob.pe}/auth/realms/mef-comp2
+
+logging:
+  level:
+    root: DEBUG
+    pe.gob.mef: INFO

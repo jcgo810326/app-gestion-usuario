@@ -1,0 +1,148 @@
+plugins {
+  //id "com.github.davidmc24.gradle.plugin.avro" version "1.3.0"
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'java'
+  id 'jacoco'
+  id "org.sonarqube" version "3.3"
+  id 'org.springframework.boot' version '2.6.1'
+}
+
+group = 'pe.gob.mef.siaf.solicitudrendicion'
+version = '1.0'
+sourceCompatibility = '11'
+
+configurations {
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
+  cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+repositories {
+  mavenCentral()
+  maven {
+        url "https://packages.confluent.io/maven/"
+    }
+  maven {
+        url "https://mvnrepository.com/"
+    }
+    
+}
+
+ext {
+  set('springCloudVersion', "2021.0.0")
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  // implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+  implementation "com.querydsl:querydsl-core:5.0.0"
+  implementation "com.querydsl:querydsl-jpa:5.0.0"
+  implementation "com.querydsl:querydsl-sql:5.0.0"
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jpa' 
+	annotationProcessor 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
+  developmentOnly 'org.springframework.boot:spring-boot-devtools'
+  implementation 'org.postgresql:postgresql'
+
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+
+  testCompileOnly 'org.projectlombok:lombok'
+  testAnnotationProcessor 'org.projectlombok:lombok'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.kafka:spring-kafka-test'
+  
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+  // Testing de API con Rest Assured
+  testImplementation 'io.rest-assured:json-path:4.4.0'
+  testImplementation 'io.rest-assured:xml-path:4.4.0'
+  testImplementation 'io.rest-assured:spring-mock-mvc:4.4.0'
+  testImplementation 'io.rest-assured:json-schema-validator:4.4.0'
+  // testImplementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+  //Importar bom para TestContainers
+  implementation platform('org.testcontainers:testcontainers-bom:1.16.2')
+  testImplementation('org.testcontainers:postgresql')
+  testImplementation('org.testcontainers:junit-jupiter')
+    /*testImplementation ('org.springframework.cloud:spring-cloud-stream') {
+        artifact {
+            name = "spring-cloud-stream"
+            extension = "jar"
+            type ="test-jar"
+            classifier = "test-binder"
+        }
+    }*/
+    // Agregar dependencia de la librería common del MEF
+  implementation files('lib/mef-common-lib-1.3.1.jar')
+  implementation files('lib/siaf-common-lib-1.0.0.jar')
+  implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.14.0.0'
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4")  
+  
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.7.6'
+  
+  // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.3.4.RELEASE'
+  
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+  // implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.1.2'
+  
+  // https://mvnrepository.com/artifact/org.springframework.security/spring-security-web
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.7.5'
+  
+  
+  // compile group: 'org.springframework.security', name: 'spring-security-core', version: '6.1.2'
+  
+  // https://mvnrepository.com/artifact/org.springframework.security/spring-security-config
+  implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.6.2'
+  
+  // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+  implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+  
+  implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+  
+  implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+  }
+}
+
+def jacocoAgent = zipTree(configurations.jacocoAgent.singleFile)
+    .filter { it.name == "jacocoagent.jar" }.singleFile
+
+test {
+  useJUnitPlatform()
+  exclude '**/cucumber/**'
+  finalizedBy jacocoTestReport
+}
+
+sourceSets{
+   generado {
+      java {
+         srcDirs = ['src/generado/java']
+       }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+    }
+}
+
+compileJava {
+  options.generatedSourceOutputDirectory = file("src/generado/java")
+}
